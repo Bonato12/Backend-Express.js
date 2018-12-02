@@ -3,9 +3,6 @@ var router = express.Router();
 var app = express();
 
 
-//Importamos CORS para poder utilizar Axios en Vue js
-const cors = require('cors');
-app.use(cors());
 
 //importamos la libreria de postgres
 var pg = require('pg');
@@ -21,7 +18,7 @@ router.route('/cliente').
       var client = new pg.Client(conString)
       client.connect();
       client.query("SELECT * FROM cliente").then(response=> {
-        //console.log(response.rows)
+        console.log(response.rows)
         //Muestra los resultados en forma de JSON en nuestro HTML
         res.json(response.rows);
         client.end()
@@ -31,6 +28,7 @@ router.route('/cliente').
       })
     }).
   post((req, res, next)=> {
+      res.header("Access-Control-Allow-Origin", "*");
       console.log("PETICION POST");
       console.log(req.body);
       var client = new pg.Client(conString)
@@ -47,29 +45,27 @@ router.route('/cliente').
       })
   });
 
+  router.route('/cliente/:id_cliente').delete((req,res)=>{
+      var client = new pg.Client(conString);
+      console.log("HOLA");
+      console.log(req.params.id_cliente);
+      client.connect();
+      //client.query("DELETE FROM cliente WHERE id_cliente = ($1)",[req.params.id_cliente])
+       client.query('DELETE FROM cliente WHERE id_cliente=($1)', [req.params.id_cliente])
+      .then(response=> {
+        //console.log(response.rows)
+        //Muestra los resultados en forma de JSON en nuestro HTML
+        res.json(response.rows);
+        client.end()
+      }).catch(error =>{
+        console.log(error);
+        client.end();
+      });
+  });
 
-
-
-
-
-/*
-var client = new pg.Client(conString)
-client.connect();
-client.query("INSERT INTO cliente VALUES($1,$2,$3,$4,$5,$6,$7,$8)",[req.body.id_cliente,req.body.dni,req.body.nombre,req.body.apellido,
-req.body.ciudad,req.body.direccion,req.body.telefono,req.body.mail]).then(response=> {
-  //console.log(response.rows)
-  //Muestra los resultados en forma de JSON en nuestro HTML
-  res.json(response.rows);
-  client.end()
-}).catch(error =>{
-  console.log(error);
-  client.end();
-})
-*/
-
-
-
-
+  //Importamos CORS para poder utilizar Axios en Vue js
+  const cors = require('cors');
+  app.use(cors());
 
 
 
