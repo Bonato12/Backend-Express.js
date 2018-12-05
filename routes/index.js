@@ -45,23 +45,49 @@ router.route('/cliente').
       })
   });
 
-  router.route('/cliente/:id_cliente').delete((req,res)=>{
+  router.route('/cliente/:id_cliente').get((req,res)=>{
       var client = new pg.Client(conString);
-      console.log("HOLA");
+      console.log("Peticion GET/ID");
       console.log(req.params.id_cliente);
       client.connect();
       //client.query("DELETE FROM cliente WHERE id_cliente = ($1)",[req.params.id_cliente])
-       client.query('DELETE FROM cliente WHERE id_cliente=($1)', [req.params.id_cliente])
+       client.query('SELECT * FROM cliente WHERE id_cliente=($1)', [req.params.id_cliente])
       .then(response=> {
-        //console.log(response.rows)
-        //Muestra los resultados en forma de JSON en nuestro HTML
         res.json(response.rows);
         client.end()
       }).catch(error =>{
         console.log(error);
         client.end();
       });
+  }).delete((req,res)=> {
+        console.log("Peticion DELETE");
+        var client = new pg.Client(conString);
+        client.connect();
+        client.query("DELETE FROM cliente WHERE id_cliente=($1)",[req.params.id_cliente]).then(response=> {
+        console.log(response.rows)
+        res.json(response.rows);
+        client.end()
+        }).catch(error =>{
+          console.log(error);
+          client.end();
+        })
+  }).put((req,res)=>{
+        console.log("Peticion PUT");
+        console.log(req.params.id_cliente);
+        var client = new pg.Client(conString);
+        client.connect();
+        client.query("UPDATE cliente SET dni=($1), nombre=($2), apellido=($3), ciudad=($4), direccion=($5), telefono=($6), mail=($7) WHERE id_cliente=($8)", [req.body.dni, req.body.nombre, req.body.apellido,req.body.ciudad,req.body.direccion,req.body.telefono,req.body.mail,req.params.id_cliente]).then(response=> {
+        console.log(response.rows)
+        res.json(response.rows);
+        client.end()
+        }).catch(error =>{
+          console.log(error);
+          client.end();
+        })
+
   });
+
+
 
   //Importamos CORS para poder utilizar Axios en Vue js
   const cors = require('cors');
