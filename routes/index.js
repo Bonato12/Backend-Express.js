@@ -35,9 +35,6 @@ router.route('/cliente').
       client.connect();
       client.query("INSERT INTO cliente VALUES($1,$2,$3,$4,$5,$6,$7,$8)",[req.body.id_cliente,req.body.dni,req.body.nombre,req.body.apellido,
       req.body.ciudad,req.body.direccion,req.body.telefono,req.body.mail]).then(response=> {
-        //console.log(response.rows)
-        //Muestra los resultados en forma de JSON en nuestro HTML
-        res.json(response.rows);
         client.end()
       }).catch(error =>{
         console.log(error);
@@ -86,6 +83,61 @@ router.route('/cliente').
         })
 
   });
+
+  router.route('/producto').get((req,res)=>{
+    res.header("Access-Control-Allow-Origin", "*");
+    var client = new pg.Client(conString)
+    client.connect();
+    client.query("SELECT * FROM producto").then(response=> {
+    console.log(response.rows);
+    res.json(response.rows);
+    client.end()
+    }).catch(error =>{
+      console.log(error);
+      client.end();
+    })
+  });
+
+  router.route('/venta').post((req,res)=>{
+      res.header("Access-Control-Allow-Origin", "*");
+      console.log("PETICION POST");
+      console.log(req.body);
+      var client = new pg.Client(conString);
+      client.connect();
+      client.query("INSERT INTO venta VALUES($1,$2,$3,$4)",[req.body.id_venta,req.body.id_cliente,req.body.id_producto,req.body.fecha]).then(response=>{
+      client.end()
+      }).catch(error=>{
+        console.log(error);
+        client.end();
+      })
+  });
+  router.route('/venta').get((req,res)=>{
+    res.header("Access-Control-Allow-Origin", "*");
+    console.log("PETICION GET");
+    var client = new pg.Client(conString);
+    client.connect();
+    client.query('SELECT cl.nombre, cl.apellido, pr.modelo, vt.fecha, vt.id_venta FROM cliente cl, producto pr, venta vt WHERE cl.id_cliente = vt.id_cliente AND pr.id_producto= vt.id_producto').then(response=>{
+    res.json(response.rows);
+    client.end()
+    }).catch(error=>{
+      console.log(error);
+      client.end();
+    })
+  });
+
+  router.route('/venta/:id_venta').delete((req,res)=>{
+    res.header("Access-Control-Allow-Origin", "*");
+    console.log(req.params.id_venta);
+    var client = new pg.Client(conString);
+    client.connect();
+    client.query("DELETE FROM venta WHERE id_venta=($1)",[req.params.id_venta]).then(response=>{
+    res.json(response.rows);
+    client.end();
+    }).catch(error =>{
+      console.log(error);
+      client.end();
+    })
+  })
 
 
 
